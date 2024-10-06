@@ -38,7 +38,7 @@ const authRouter = require('./routes/auth')
 const jobsRouter = require('./routes/jobs')
 
 app.get('/', (req, res) => {
-  res.send('<h1>Jobs API</h1><a href="/api-docs">Documentation</a>');
+  res.send('<h1>Jobs API</h1><a href="/documentation.html">Documentation</a>');
 });
 app.use('/api-docs', swaggerUI.serve, swaggerUI.setup(swaggerDocument));
 
