@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-
+const statusValues = ['Employed', 'Interview', 'Declined', 'Pending'];
 const JobSchema = new mongoose.Schema(
   {
     company: {
@@ -13,13 +13,13 @@ const JobSchema = new mongoose.Schema(
       maxlength: [100, 'Position name cannot exceed 50 characters'],
     },
     status: {
-      type: String,
-      enum:{
-       values: ['Employed', 'Interview', 'Declined', 'Pending'],
-       message: '{VALUE} is not valid'
-      },  
-      default: 'Pending',
+    type: String,
+    enum: {
+      values: statusValues,
+      message: (props) => `${props.value} is not valid. Valid values: ${statusValues.join(', ')}`
     },
+    default: 'Pending',
+  },
     createdBy: {
       type: mongoose.Types.ObjectId,
       ref: "User",

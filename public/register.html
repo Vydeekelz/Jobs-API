@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Jobs Management</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        body {
+            background-color: #f8f9fa;
+        }
+        .form-container {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .alert {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="form-container mt-5">
+            <h1 class="text-center">Register</h1>
+            <div id="alertMessage" class="alert" style="display: none;"></div>
+            <div class="form-group">
+                <input type="text" id="regName" class="form-control" placeholder="Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" id="regEmail" class="form-control" placeholder="Email" required>
+            </div>
+            <div class="form-group">
+                <input type="password" id="regPassword" class="form-control" placeholder="Password" required>
+            </div>
+            <button class="btn btn-primary btn-block" onclick="register()">Register</button>
+            <div class="text-center mt-3">
+                <a href="login.html">Already signed up? Login here</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const apiBaseUrl = 'https://jobs-api-p2dz.onrender.com/api/v1'; // Update with your API endpoint
+
+        // Show a non-blocking alert message
+        function showAlert(message, type = 'error') {
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.style.display = 'block';
+            alertMessage.className = `alert ${type === 'error' ? 'alert-danger' : 'alert-success'}`;
+            alertMessage.innerText = message;
+
+            setTimeout(() => {
+                alertMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Register a new user
+        async function register() {
+            const name = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ name, email, password })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('Registration successful! Redirecting to login...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 3000);
+                } else {
+                    showAlert(`Error: ${data.msg}`);
+                }
+            } catch (error) {
+                console.error('Error registering user:', error);
+                showAlert('An error occurred during registration.');
+            }
+        }
+    </script>
+</body>
+</html>

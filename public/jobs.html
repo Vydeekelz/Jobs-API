@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jobs Management</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom Styles */
+        .job-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .job-actions {
+            margin-top: 10px;
+        }
+        .job-details {
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #e2e3e8;
+            background-color: #ffffff;
+        }
+        .alert {
+            margin: 20px 0;
+        }
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Logout Button -->
+        <button class="btn btn-danger logout-btn" onclick="logout()">Logout</button>
+
+        <h1 class="my-4">Jobs Management</h1>
+        
+        <h2 id="welcomeMessage" class="text-success"></h2> <!-- Placeholder for welcome message -->
+
+        <!-- Create Job Section -->
+        <div class="mb-4">
+            <h2>Create Job</h2>
+            <div class="form-group">
+                <input type="text" id="company" class="form-control" placeholder="Company Name">
+            </div>
+            <div class="form-group">
+                <input type="text" id="position" class="form-control" placeholder="Position">
+            </div>
+            <button class="btn btn-primary" onclick="createJob()">Create Job</button>
+        </div>
+
+        <!-- Alert Message Section -->
+        <div id="alertMessage" class="alert" style="display: none;"></div>
+
+        <!-- Get All Jobs Section -->
+        <div>
+            <h2>All Jobs</h2>
+            <button class="btn btn-info" onclick="getAllJobs()">Fetch All Jobs</button>
+            <div id="jobsList" class="mt-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiBaseUrl = 'https://jobs-api-p2dz.onrender.com/api/v1'; // Update with your API endpoint
+
+        // Retrieve token from localStorage
+        function getToken() {
+            return localStorage.getItem('jwtToken');
+        }
+
+        // Show a non-blocking alert message
+        function showAlert(message, type = 'error') {
+            const alertMessage = document.getElementById('alertMessage');
+            alertMessage.style.display = 'block';
+            alertMessage.className = `alert ${type === 'error' ? 'alert-danger' : 'alert-success'}`;
+            alertMessage.innerText = message;
+
+            setTimeout(() => {
+                alertMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Get user info from token
+        function getUserName() {
+            const token = getToken();
+            if (token) {
+                const payload = JSON.parse(atob(token.split('.')[1])); // Decode JWT
+                return payload.name; // Assuming the name is stored in the token
+            }
+            return null;
+        }
+
+        // Display welcome message
+        function displayWelcomeMessage() {
+            const userName = getUserName();
+            if (userName) {
+                const welcomeMessage = document.getElementById('welcomeMessage');
+                welcomeMessage.innerText = `Hi, ${userName}. Welcome to your Jobs page!`;
+            }
+        }
+
+        // Create a new job
+        async function createJob() {
+            const company = document.getElementById('company').value;
+            const position = document.getElementById('position').value;
+            const token = getToken();
+
+            if (!token) {
+                showAlert('Please log in first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/jobs`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ company, position })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('Job created successfully!', 'success');
+                    getAllJobs(); // Refresh the jobs list
+                } else {
+                    showAlert(`Error: ${data.msg}`);
+                }
+            } catch (error) {
+                console.error('Error creating job:', error);
+            }
+        }
+
+        // Get all jobs
+        async function getAllJobs() {
+            const token = getToken();
+
+            if (!token) {
+                showAlert('Please log in first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/jobs`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const jobsList = document.getElementById('jobsList');
+                    jobsList.innerHTML = '';
+
+                    data.jobs.forEach(job => {
+                        const jobDiv = document.createElement('div');
+                        jobDiv.classList.add('job-container');
+                        jobDiv.innerHTML = `
+                            <p><strong>Company:</strong> ${job.company}</p>
+                            <p><strong>Position:</strong> ${job.position}</p>
+                            <p><strong>Status:</strong> ${job.status}</p>
+                            <div class="job-actions">
+                                <button class="btn btn-secondary" onclick="getSingleJob('${job._id}', this)">View Details</button>
+                                <button class="btn btn-danger" onclick="confirmDeleteJob('${job._id}')">Delete</button>
+                                <button class="btn btn-warning" onclick="showUpdateJobForm('${job._id}', '${job.company}', '${job.position}', '${job.status}')">Update</button>
+                            </div>
+                            <div class="job-details" id="details-${job._id}" style="display: none;"></div>
+                        `;
+                        jobsList.appendChild(jobDiv);
+                    });
+                } else {
+                    showAlert(`Error: ${data.msg}`);
+                }
+            } catch (error) {
+                console.error('Error fetching jobs:', error);
+            }
+        }
+
+        // Get a single job and expand its details
+        async function getSingleJob(jobId, button) {
+            const token = getToken();
+
+            if (!token) {
+                showAlert('Please log in first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/jobs/${jobId}`, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    const detailsDiv = document.getElementById(`details-${jobId}`);
+                    detailsDiv.innerHTML = `
+                        <p><strong>Created At:</strong> ${new Date(data.job.createdAt).toLocaleString()}</p>
+                        <p><strong>Updated At:</strong> ${new Date(data.job.updatedAt).toLocaleString()}</p>
+                        <p><strong>Status:</strong> ${data.job.status}</p>
+                    `;
+                    detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
+                    button.innerText = detailsDiv.style.display === 'none' ? 'View Details' : 'Hide Details';
+                } else {
+                    showAlert(`Error: ${data.msg}`);
+                }
+            } catch (error) {
+                console.error('Error fetching job details:', error);
+            }
+        }
+
+        // Confirm before deleting a job
+        function confirmDeleteJob(jobId) {
+            if (confirm('Are you sure you want to delete this job?')) {
+                deleteJob(jobId);
+            }
+        }
+
+        // Delete a job
+        async function deleteJob(jobId) {
+            const token = getToken();
+
+            if (!token) {
+                showAlert('Please log in first.');
+                return;
+            }
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/jobs/${jobId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('Job deleted successfully!', 'success');
+                    getAllJobs(); // Refresh the jobs list
+                } else {
+                    showAlert(`Error: ${data.msg}`);
+                }
+            } catch (error) {
+                console.error('Error deleting job:', error);
+            }
+        }
+
+        // Logout and clear the token from localStorage
+        function logout() {
+            localStorage.removeItem('jwtToken');
+            window.location.href = 'login.html?message=You are now logged out';
+        }
+
+        // Show the update job form
+        function showUpdateJobForm(jobId, company, position, status) {
+            const detailsDiv = document.getElementById(`details-${jobId}`);
+            detailsDiv.innerHTML = `
+                <form>
+                    <div class="form-group">
+                        <label for="updateCompany-${jobId}">Company:</label>
+                        <input type="text" class="form-control" id="updateCompany-${jobId}" value="${company}">
+                    </div>
+                    <div class="form-group">
+                        <label for="updatePosition-${jobId}">Position:</label>
+                        <input type="text" class="form-control" id="updatePosition-${jobId}" value="${position}">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateStatus-${jobId}">Status:</label>
+                        <select class="form-control" id="updateStatus-${jobId}">
+                            <option value="Employed" ${status === 'Employed' ? 'selected' : ''}>Employed</option>
+                            <option value="Interview" ${status === 'Interview' ? 'selected' : ''}>Interview</option>
+                            <option value="Declined" ${status === 'Declined' ? 'selected' : ''}>Declined</option>
+                            <option value="Pending" ${status === 'Pending' ? 'selected' : ''}>Pending</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-success" onclick="updateJob('${jobId}')">Save Changes</button>
+                </form>
+            `;
+            detailsDiv.style.display = detailsDiv.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Update job details
+        async function updateJob(jobId) {
+            const token = getToken();
+
+            if (!token) {
+                showAlert('Please log in first.');
+                return;
+            }
+
+            const updatedCompany = document.getElementById(`updateCompany-${jobId}`).value;
+            const updatedPosition = document.getElementById(`updatePosition-${jobId}`).value;
+            const updatedStatus = document.getElementById(`updateStatus-${jobId}`).value;
+
+            try {
+                const response = await fetch(`${apiBaseUrl}/jobs/${jobId}`, {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        company: updatedCompany,
+                        position: updatedPosition,
+                        status: updatedStatus
+                    })
+                });
+
+                const data = await response.json();
+                if (response.ok) {
+                    showAlert('Job updated successfully!', 'success');
+                    getAllJobs(); // Refresh the jobs list
+                } else {
+                    showAlert(`Error: ${data.msg}`);
+                }
+            } catch (error) {
+                console.error('Error updating job:', error);
+            }
+        }
+
+        // Initial call to display welcome message
+        displayWelcomeMessage();
+    </script>
+</body>
+</html>
