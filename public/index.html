@@ -4,15 +4,47 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Homepage - Jobs API</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Light gray background */
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            margin-top: 50px;
+            padding: 30px;
+            background-color: #ffffff; /* White background for content */
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+        }
+        h1 {
+            color: #343a40; /* Dark gray */
+        }
+        p {
+            font-size: 1.2em; /* Slightly larger text */
+        }
+        a {
+            color: #007bff; /* Bootstrap link color */
+            text-decoration: none; /* Remove underline */
+        }
+        a:hover {
+            text-decoration: underline; /* Underline on hover */
+        }
+        hr {
+            margin: 30px 0; /* Space around horizontal rule */
+        }
+    </style>
 </head>
 <body>
-    <h1>Hi there! Welcome!</h1>
+    <div class="container text-center">
+        <h1>Hi there! Welcome!</h1>
 
-    <p>New user? <a href="register.html">Register here</a></p>
-    <p>Already signed up? <a href="login.html">Login here</a></p>
+        <p>New user? <a href="register.html">Register here</a></p>
+        <p>Already signed up? <a href="login.html">Login here</a></p>
 
-    <hr>
+        <hr>
 
-    <a href="documentation.html">API Documentation</a>
+        <a href="documentation.html" class="btn btn-info">API Documentation</a>
+    </div>
 </body>
 </html>
