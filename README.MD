@@ -7,6 +7,8 @@ JWT_SECRET
 MONGO_URI_TEST (database connection for tests)
 
 to use locally, in your html files set apiBaseURL to 'http://localhost:5000/api/v1' 
+add to script on package.json  -  "dev": "nodemon server.js", //npm run dev
+
 After that run this command
 
 ```bash

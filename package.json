@@ -5,7 +5,6 @@
   "main": "app.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "nodemon server.js", //npm run dev
     "test": "jest"
   },
   "author": "",
