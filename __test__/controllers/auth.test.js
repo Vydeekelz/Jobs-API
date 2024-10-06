@@ -6,7 +6,6 @@ const app = require('../../app')
 // let myServer;
 
 beforeAll(async () => {
-  // myServer = await start() ; 
   jest.spyOn(console, 'log').mockImplementation(()=>{})
 })
 
@@ -19,7 +18,7 @@ jest.setTimeout(10000);
 jest.mock('../../models/User')
 
 
-describe('register new user', () => {
+describe('Register new user', () => {
   it('should register a new user and return a token', async () => {
 
     User.create.mockResolvedValue({
