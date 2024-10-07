@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +11,7 @@
         body {
             background-color: #f8f9fa;
         }
+
         .form-container {
             max-width: 400px;
             margin: auto;
@@ -18,11 +20,13 @@
             border-radius: 8px;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
+
         .alert {
             margin: 20px 0;
         }
     </style>
 </head>
+
 <body>
     <div class="container">
         <div class="form-container mt-5">
@@ -32,7 +36,7 @@
                 <input type="email" id="loginEmail" class="form-control" placeholder="Email" required>
             </div>
             <div class="form-group">
-                <input type="password" id="loginPassword" class="form-control" placeholder="Password" required>
+                <input type="text" id="loginPassword" class="form-control" placeholder="Password" required oninput="handlePasswordInput(event)">
             </div>
             <button class="btn btn-primary btn-block" onclick="login()">Login</button>
             <div class="text-center mt-3">
@@ -42,7 +46,7 @@
     </div>
 
     <script>
-        const apiBaseUrl = 'https://jobs-api-p2dz.onrender.com/api/v1'; // Update with your API endpoint
+        const apiBaseUrl = 'http://localhost:5000/api/v1'; // Update with your API endpoint
 
         // Show a non-blocking alert message
         function showAlert(message, type = 'error') {
@@ -56,10 +60,38 @@
             }, 3000);
         }
 
+        // Handle password input with delayed masking
+        let passwordBuffer = '';
+        let timeout;
+
+        function handlePasswordInput(event) {
+            const input = event.target;
+            const currentValue = input.value;
+
+            if (currentValue.length > passwordBuffer.length) {
+                passwordBuffer += currentValue[currentValue.length - 1];
+                
+                // Clear the previous timeout
+                clearTimeout(timeout);
+
+                // Mask the password after 1 second
+                timeout = setTimeout(() => {
+                    input.type = 'password'; // Change input type to password
+                    input.value = '*'.repeat(passwordBuffer.length); // Display asterisks
+                }, 1000);
+            } else {
+                // Handle character deletion
+                passwordBuffer = passwordBuffer.slice(0, -1);
+            }
+
+            // Update input type to text temporarily
+            input.type = 'text'; // Temporarily show the actual characters
+            input.value = currentValue; // Maintain the current input value
+        }
+
         // Login an existing user
         async function login() {
             const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
 
             try {
                 const response = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -67,7 +99,7 @@
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ email, password })
+                    body: JSON.stringify({ email, password: passwordBuffer })
                 });
 
                 const data = await response.json();
@@ -87,4 +119,5 @@
         }
     </script>
 </body>
+
 </html>

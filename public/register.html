@@ -36,6 +36,9 @@
             </div>
             <div class="form-group">
                 <input type="password" id="regPassword" class="form-control" placeholder="Password" required>
+                <small class="form-text text-muted">
+                    Password must be at least 8 characters long, including an uppercase letter, a number, and a special character.
+                </small>
             </div>
             <button class="btn btn-primary btn-block" onclick="register()">Register</button>
             <div class="text-center mt-3">
@@ -45,7 +48,7 @@
     </div>
 
     <script>
-        const apiBaseUrl = 'https://jobs-api-p2dz.onrender.com/api/v1'; // Update with your API endpoint
+        const apiBaseUrl = 'http://localhost:5000/api/v1'; // Update with your API endpoint
 
         // Show a non-blocking alert message
         function showAlert(message, type = 'error') {
@@ -59,11 +62,47 @@
             }, 3000);
         }
 
+        // Validate the password using regex
+        function isPasswordValid(password) {
+            const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+            return passwordRegex.test(password);
+        }
+
+        // Temporarily show last typed character before masking it
+        function showLastTypedPasswordChar() {
+            const passwordInput = document.getElementById('regPassword');
+            let lastValue = passwordInput.value;
+
+            passwordInput.addEventListener('input', () => {
+                const currentValue = passwordInput.value;
+
+                if (currentValue.length > lastValue.length) {
+                    // Show the last typed character for 1 second
+                    setTimeout(() => {
+                        passwordInput.type = 'text';
+                        setTimeout(() => {
+                            passwordInput.type = 'password';
+                        }, 1000);
+                    }, 0);
+                }
+
+                lastValue = currentValue;
+            });
+        }
+
+        showLastTypedPasswordChar();
+
         // Register a new user
         async function register() {
             const name = document.getElementById('regName').value;
             const email = document.getElementById('regEmail').value;
             const password = document.getElementById('regPassword').value;
+
+            // Validate password
+            if (!isPasswordValid(password)) {
+                showAlert('Password must be at least 8 characters long, including an uppercase letter, a number, and a special character.');
+                return;
+            }
 
             try {
                 const response = await fetch(`${apiBaseUrl}/auth/register`, {
