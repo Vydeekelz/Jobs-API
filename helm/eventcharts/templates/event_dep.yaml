@@ -1,0 +1,29 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eventapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: eventapp
+  template:
+    metadata:
+      labels:
+        app: eventapp
+      generateName: eventapp-
+    spec:
+      containers:
+      - name: eventapp
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        # imagePullPolicy: Never
+        ports:
+        - containerPort: {{ .Values.service.port }}
+        envFrom:
+        - configMapRef:
+            name: eventapp-config
+      initContainers:
+      - name: wait-for-mongodb
+        image: busybox
+        command: ['sh', '-c', 'until nc -z mongodb 27017; do echo waiting for mongodb; sleep 2; done;']

@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: eventapp-config
+data:
+  MONGO_URI: {{ .Values.config.mongoUri | quote }}
+  PORT: {{ .Values.config.port | quote }}
+  JWT_SECRET: {{ .Values.config.jwtSecret | quote }}

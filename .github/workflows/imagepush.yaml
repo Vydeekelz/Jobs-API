@@ -1,0 +1,60 @@
+name: Build and Push Docker Image
+
+on:
+  push:
+    branches:
+      - mai
+  pull_request:
+    branches:
+      - mai
+
+env:
+  # Credentials for dockerhub
+  DOCKER_HUB_USERNAME:
+  DOCKER_HUB_ACCESS_TOKEN:
+  # Credentials for AWS
+  AWS_ACCESS_KEY_ID:
+  AWS_SECRET_ACCESS_KEY:
+  # AWS region
+  AWS_REGION: us-east-2
+  # # Environment variables for Docker Compose
+
+
+jobs:
+  build:
+    name: "Apply source code changes"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-buildx-
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKER_HUB_USERNAME }}
+        password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
+
+    - name: Build and tag Docker image
+      id: build
+      run: |
+        BUILD_NUMBER=${{ github.run_number }}
+        docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:$BUILD_NUMBER -t ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:latest -f docker-files/app/Dockerfile .
+        echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+
+    - name: Push Docker image
+      run: |
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:${{ env.BUILD_NUMBER }}
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:latest
+
