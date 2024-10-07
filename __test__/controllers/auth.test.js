@@ -2,15 +2,20 @@ const request = require('supertest');
 const mongoose = require('mongoose');
 const User = require('../../models/User')
 const app = require('../../app')
-// const start = require("../../server");
-// let myServer;
+
+// commented out the database connection set-up since I mocked the functionality instead
 
 beforeAll(async () => {
-  jest.spyOn(console, 'log').mockImplementation(()=>{})
+ // Set up database connection
+//  await mongoose.connect(process.env.MONGO_URI_TEST);
+
+//  silence console messages
+ jest.spyOn(console, 'log').mockImplementation(()=>{})
 })
 
 // afterAll(async () => {
-//   await myServer.close(); //close the server connection
+  // Clean up the database
+  // await User.deleteMany({});
 //   await mongoose.connection.close(); //close the database connection
 // })
 
