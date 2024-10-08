@@ -17,6 +17,7 @@ spec:
       containers:
       - name: mongodb
         image: "{{ .Values.mongodb.image.repository }}:{{ .Values.mongodb.image.tag }}"
+        pullPolicy: IfNotPresent
         ports:
         - containerPort: {{ .Values.mongodb.service.port }}
         volumeMounts:

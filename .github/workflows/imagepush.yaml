@@ -3,7 +3,7 @@ name: Build and Push Docker Image
 on:
   push:
     branches:
-      - mai
+      - containerize
   pull_request:
     branches:
       - mai
@@ -50,11 +50,11 @@ jobs:
       id: build
       run: |
         BUILD_NUMBER=${{ github.run_number }}
-        docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:$BUILD_NUMBER -t ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:latest -f docker-files/app/Dockerfile .
+        docker build -t ${{ secrets.DOCKER_HUB_USERNAME }}/jobsapp:$BUILD_NUMBER -t ${{ secrets.DOCKER_HUB_USERNAME }}/jobsapp:latest -f docker-files/app/Dockerfile .
         echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
 
     - name: Push Docker image
       run: |
-        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:${{ env.BUILD_NUMBER }}
-        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/eventapp:latest
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jobsapp:${{ env.BUILD_NUMBER }}
+        docker push ${{ secrets.DOCKER_HUB_USERNAME }}/jobsapp:latest
 

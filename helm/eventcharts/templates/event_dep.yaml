@@ -2,27 +2,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: eventapp
+  name: jobsapp
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: eventapp
+      app: jobsapp
   template:
     metadata:
       labels:
-        app: eventapp
-      generateName: eventapp-
+        app: jobsapp
+      generateName: jobsapp-
     spec:
       containers:
-      - name: eventapp
+      - name: jobsapp
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        # imagePullPolicy: Never
         ports:
         - containerPort: {{ .Values.service.port }}
         envFrom:
         - configMapRef:
-            name: eventapp-config
+            name: jobsapp-config
       initContainers:
       - name: wait-for-mongodb
         image: busybox
