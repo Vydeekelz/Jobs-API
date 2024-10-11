@@ -15,9 +15,6 @@ WORKDIR /usr/src/app
 
 COPY --from=builder /usr/src/app .
 
-# Import env variables directly into the container
-# ENV MONGO_URI=mongodb+srv://tayoefunshile:ZdlAAiXvjGhIqss0@jobsappdb.9alol.mongodb.net/?retryWrites=true&w=majority&appName=jobsappdb
-# ENV PORT=5000
 
 EXPOSE 5000
 
